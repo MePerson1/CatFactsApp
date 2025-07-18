@@ -19,7 +19,7 @@ namespace CatFactsApp
             int count = 0;
             string path = "";
             ConsoleKeyInfo cki;
-            CatFact catFact = new CatFact();
+            CatFact? catFact = null;
 
             do
             {
@@ -34,23 +34,26 @@ namespace CatFactsApp
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Something went wrong: " + ex);
+                    Console.WriteLine("[ERROR] Something went wrong with API Connection: " + ex.Message);
                 }
 
-                if (string.IsNullOrEmpty(path))
+                if (path == "")
                     path = $"catfacts_{DateTime.UtcNow:dd-MM-yyyy_HH-mm-ss}.txt";
 
-                if (catFact is not null && !(string.IsNullOrEmpty(path)))
+                if (catFact is not null && path != "")
                 {
-                    _fileHandler.SaveDataToFile(path, $"{++count}. {catFact.Fact} - length({catFact.Length})");
+                    SaveFactToFile(path, $"{++count}. {catFact.Fact} - length({catFact.Length})");
+
                     Console.WriteLine($"Data saved in:\n{path}\n");
                     Console.WriteLine(new string('.', Console.WindowWidth - 1));
                     Console.WriteLine("\n CAT FACT \n");
-                    foreach (string fact in _fileHandler.ReadFile(path))
-                        Console.WriteLine(fact + "\n");
+
+                    DisplayFileContent(path);
+
                     Console.WriteLine(new string('.', Console.WindowWidth - 1));
 
                 }
+
 
                 Console.WriteLine("To add more facts to file - press any key \nWant to exit app? - press ESC");
 
@@ -62,5 +65,30 @@ namespace CatFactsApp
             Console.WriteLine("->You can find the generated file in:\n" + Environment.CurrentDirectory + $"\\{path}");
 
         }
+
+        private void SaveFactToFile(string path, string fact)
+        {
+            try
+            {
+                _fileHandler.SaveDataToFile(path, fact);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[ERROR] Something went wrong creating file: " + ex.Message);
+            }
+        }
+        private void DisplayFileContent(string path)
+        {
+            try
+            {
+                foreach (string fact in _fileHandler.ReadFile(path))
+                    Console.WriteLine(fact + "\n");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[ERROR] Something went wrong with reading file: " + ex.Message);
+            }
+        }
+
     }
 }
