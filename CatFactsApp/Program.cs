@@ -1,58 +1,26 @@
-﻿using CatFactsApp.Objects;
+﻿using CatFactsApp.Interfaces;
 using CatFactsApp.Service;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CatFactsApp
 {
     internal class Program
     {
         //extra - zapis do XML (na początku wybór)
-        //MVC? - serviceCollection?
-        static HttpClient client = new HttpClient();
         static void Main(string[] args)
         {
-            CatFactRepository _catFactRepository = new CatFactRepository(client);
-            TxtFileHandler _fileHandler = new TxtFileHandler();
+            var services = new ServiceCollection();
 
-            var maxLoops = 10;
-            var count = 0;
-            string path = "";
-            ConsoleKeyInfo cki = new ConsoleKeyInfo();
-            CatFact catFact = new CatFact();
+            services.AddHttpClient();
+            services.AddSingleton<IFileHandler, TxtFileHandler>();
+            services.AddSingleton<ICatFactRepository, CatFactRepository>();
+            services.AddTransient<CatFactsApp>();
 
-            while (cki.Key != ConsoleKey.Escape && maxLoops > 0)
-            {
-                try
-                {
-                    var newCatFact = _catFactRepository.GetFact();
-                    if (newCatFact != null)
-                    {
-                        catFact = newCatFact;
-                    }
+            var provider = services.BuildServiceProvider();
 
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
+            var app = provider.GetRequiredService<CatFactsApp>();
 
-                if (path == "")
-                    path = $"catfacts_{DateTime.UtcNow:dd-MM-yyyy_HH-mm-ss}.txt";
-
-                if (catFact != null && path != "")
-                {
-                    Console.WriteLine(new string('.', Console.WindowWidth - 1));
-                    Console.WriteLine("CAT FACT " + ++count);
-                    Console.WriteLine(catFact.Fact);
-                    Console.WriteLine(new string('.', Console.WindowWidth - 1));
-                    _fileHandler.SaveDataToFile(path, $"{count}. {catFact.Fact} - lengt({catFact.Length})");
-                }
-
-                Console.WriteLine(new string('-', Console.WindowWidth - 1));
-                Console.WriteLine("For more facts - press any key \nWant to exit app? - press ESC");
-                maxLoops--;
-                cki = Console.ReadKey();
-                Console.Clear();
-            }
+            app.Run();
 
         }
     }
