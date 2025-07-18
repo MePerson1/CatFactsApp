@@ -13,9 +13,9 @@ namespace CatFactsApp.Service
             _httpClient = httpClient;
         }
 
-        public CatFact? GetFact()
+        public async Task<CatFact?> GetFact()
         {
-            var result = _httpClient.GetStringAsync("https://catfact.ninja/fact").Result;
+            var result = await _httpClient.GetStringAsync("https://catfact.ninja/fact");
 
             return JsonSerializer.Deserialize<CatFact>(result, new JsonSerializerOptions
             {

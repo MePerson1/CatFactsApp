@@ -14,7 +14,7 @@ namespace CatFactsApp
             _fileHandler = fileHandler;
         }
 
-        public void Run()
+        public async Task RunAsync()
         {
             int count = 0;
             string path = "";
@@ -25,7 +25,7 @@ namespace CatFactsApp
             {
                 try
                 {
-                    var newCatFact = _catFactRepository.GetFact();
+                    var newCatFact = await _catFactRepository.GetFact();
                     if (newCatFact != null)
                     {
                         catFact = newCatFact;
@@ -37,12 +37,12 @@ namespace CatFactsApp
                     Console.WriteLine("Something went wrong: " + ex);
                 }
 
-                if (path == "")
+                if (string.IsNullOrEmpty(path))
                     path = $"catfacts_{DateTime.UtcNow:dd-MM-yyyy_HH-mm-ss}.txt";
 
-                if (catFact != null && path != "")
+                if (catFact is not null && !(string.IsNullOrEmpty(path)))
                 {
-                    _fileHandler.SaveDataToFile(path, $"{++count}. {catFact.Fact} - lengt({catFact.Length})");
+                    _fileHandler.SaveDataToFile(path, $"{++count}. {catFact.Fact} - length({catFact.Length})");
                     Console.WriteLine($"Data saved in:\n{path}\n");
                     Console.WriteLine(new string('.', Console.WindowWidth - 1));
                     Console.WriteLine("\n CAT FACT \n");
@@ -56,9 +56,10 @@ namespace CatFactsApp
 
                 cki = Console.ReadKey();
                 Console.Clear();
+
             } while (cki.Key != ConsoleKey.Escape);
 
-            Console.WriteLine("YYou can find the generated file in:\n" + Environment.CurrentDirectory + $"\\{path}");
+            Console.WriteLine("->You can find the generated file in:\n" + Environment.CurrentDirectory + $"\\{path}");
 
         }
     }

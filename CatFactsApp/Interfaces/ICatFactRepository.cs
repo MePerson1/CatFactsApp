@@ -4,6 +4,6 @@ namespace CatFactsApp.Interfaces
 {
     internal interface ICatFactRepository
     {
-        public CatFact? GetFact();
+        public Task<CatFact?> GetFact();
     }
 }
